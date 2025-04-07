@@ -98,5 +98,7 @@ Feel free to fork and raise pull requests to contribute.
 
 This project is licensed under the MIT License.
 
+Snapshot..
+![Screenshot (79)](https://github.com/user-attachments/assets/214579e5-d55b-46e9-afa1-e56b091d4fb9)
 
 
