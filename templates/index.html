@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Finance Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .summary-box {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 20px auto 0;
+        }
+
+        .export-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px auto 0;
+            transition: background 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #0056b3;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, select, button {
+            padding: 10px;
+            margin: 10px 5px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .transaction {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+
+        .income {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .expense {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .actions a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .actions a:hover {
+            text-decoration: underline;
+        }
+
+        .no-transactions {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>💸 Personal Finance Tracker</h1>
+
+    <div class="summary-box">
+        <h3>📅 Summary for {{ month_year }}</h3>
+        <p><strong>Income:</strong> ₹{{ income_total }} &nbsp; | &nbsp; <strong>Expense:</strong> ₹{{ expense_total }}</p>
+        <div class="chart-container">
+            <canvas id="summaryChart"></canvas>
+        </div>
+        <div style="text-align: center;">
+            <a href="/export" class="export-btn">📤 Export to CSV</a>
+        </div>
+    </div>
+
+    <h2>Add New Transaction</h2>
+    <form action="/add" method="post">
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="number" step="0.01" name="amount" placeholder="Amount" required>
+        <select name="type" required>
+            <option value="" disabled selected>Choose type</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select>
+        <button type="submit">➕ Add</button>
+    </form>
+
+    <h2>All Transactions</h2>
+    {% for txn in transactions %}
+        <div class="transaction">
+            {{ txn.date }} - ₹{{ txn.amount }} - {{ txn.description }}
+            <span class="{{ txn.type }}">({{ txn.type }})</span>
+            <div class="actions">
+                <a href="/edit/{{ txn.id }}">✏️ Edit</a>
+                <a href="/delete/{{ txn.id }}">❌ Delete</a>
+            </div>
+        </div>
+    {% else %}
+        <p class="no-transactions">No transactions yet.</p>
+    {% endfor %}
+
+    <script>
+        const ctx = document.getElementById('summaryChart').getContext('2d');
+        const income = {{ income_total or 0 }};
+        const expense = {{ expense_total or 0 }};
+        const hasIncome = income > 0;
+        const hasExpense = expense > 0;
+
+        let labels = [];
+        let data = [];
+        let colors = [];
+
+        if (hasIncome) {
+            labels.push("Income");
+            data.push(income);
+            colors.push("#28a745");
+        }
+        if (hasExpense) {
+            labels.push("Expense");
+            data.push(expense);
+            colors.push("#dc3545");
+        }
+
+        if (data.length === 0) {
+            labels = ["No data"];
+            data = [1];
+            colors = ["#6c757d"];
+        }
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (labels[0] === "No data") return "No transactions yet";
+                                return context.label + ": ₹" + context.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

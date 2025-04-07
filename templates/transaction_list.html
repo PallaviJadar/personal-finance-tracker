@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transactions</title>
+</head>
+<body>
+    <h1>All Transactions</h1>
+    <a href="{{ url_for('transaction.add_transaction') }}">Add New</a>
+    <ul>
+        {% for tx in transactions %}
+            <li>{{ tx.date }} - ₹{{ tx.amount }} - {{ tx.category }} ({{ tx.type }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

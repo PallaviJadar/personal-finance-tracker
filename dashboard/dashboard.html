@@ -1,0 +1,38 @@
+from flask import Blueprint, render_template, request, redirect, url_for
+from app import db
+from models import Transaction
+from datetime import datetime
+
+transaction_bp = Blueprint('transaction', __name__)
+
+@transaction_bp.route('/')
+def index():
+    return redirect(url_for('transaction.add_transaction'))
+
+@transaction_bp.route('/add-transaction', methods=['GET', 'POST'])
+def add_transaction():
+    if request.method == 'POST':
+        date = request.form['date']
+        amount = float(request.form['amount'])
+        category = request.form['category']
+        type = request.form['type']
+        notes = request.form['notes']
+
+        transaction = Transaction(date=date, amount=amount, category=category, type=type, notes=notes)
+        db.session.add(transaction)
+        db.session.commit()
+        return redirect(url_for('transaction.view_transactions'))
+
+    return render_template('add_transaction.html')
+
+@transaction_bp.route('/transactions')
+def view_transactions():
+    transactions = Transaction.query.order_by(Transaction.date.desc()).all()
+    return render_template('transactions.html', transactions=transactions)
+
+@transaction_bp.route('/dashboard')
+def dashboard():
+    income = db.session.query(db.func.sum(Transaction.amount)).filter_by(type='income').scalar() or 0
+    expense = db.session.query(db.func.sum(Transaction.amount)).filter_by(type='expense').scalar() or 0
+    balance = income - expense
+    return render_template('dashboard.html', income=income, expense=expense, balance=balance)

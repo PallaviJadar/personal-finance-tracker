@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Transactions</title>
+</head>
+<body>
+    <h1>All Transactions</h1>
+
+    <div style="margin-bottom: 20px; font-size: 18px;">
+        💰 <strong>Total Income:</strong> ₹{{ total_income }} |
+        💸 <strong>Total Expense:</strong> ₹{{ total_expense }} |
+        🟢 <strong>Balance:</strong> ₹{{ balance }}
+    </div>
+
+    <a href="{{ url_for('transaction.add_transaction') }}">Add New</a>
+
+    <h3>🔍 Filter & Search</h3>
+    <form method="get" action="{{ url_for('transaction.all_transactions') }}">
+        Type:
+        <select name="type">
+            <option value="">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select>
+
+        Category: <input type="text" name="category">
+        Date From: <input type="date" name="start_date">
+        To: <input type="date" name="end_date">
+        Notes: <input type="text" name="search">
+        <button type="submit">Filter</button>
+    </form>
+
+    <ul>
+        {% for t in transactions %}
+            <li>
+                {{ t.date }} - ₹{{ t.amount }} - {{ t.category }} ({{ t.type }}) - {{ t.notes }}
+                <a href="{{ url_for('transaction.edit_transaction', id=t.id) }}">✏️ Edit</a>
+                <a href="{{ url_for('transaction.delete_transaction', id=t.id) }}" onclick="return confirm('Are you sure?');">🗑️ Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

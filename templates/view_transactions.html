@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>All Transactions</title></head>
+<body>
+  <h2>All Transactions</h2>
+  <table border="1">
+    <tr>
+      <th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th>
+    </tr>
+    {% for t in transactions %}
+    <tr>
+      <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
+      <td>{{ t.type }}</td>
+      <td>{{ t.category }}</td>
+      <td>{{ t.amount }}</td>
+      <td>{{ t.description }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <a href="/add-transaction">Add New Transaction</a>
+</body>
+</html>
